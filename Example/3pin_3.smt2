@@ -83,7 +83,7 @@
             (bvadd  COST_h1)
         )
 )
-;;; greater than 0
+;;; not equal to 0
 (assert (not(=
             (bvadd  (ite ( = E_r1c1_r1c2 true) COST_h1 (_ bv0 4))
                     (ite ( = E_r2c1_r2c2 true) COST_h1 (_ bv0 4))
@@ -110,7 +110,7 @@
             (bvadd  COST_v1 COST_v2)
         )
 )
-;;; greater than 0
+;;; not equal to 0
 (assert (not(=
             (bvadd  (ite ( = E_r1c1_r2c1 true) COST_v1 (_ bv0 4))
                     (ite ( = E_r1c2_r2c2 true) COST_v1 (_ bv0 4))
@@ -120,6 +120,7 @@
             (_ bv0 4)
         ))
 )
+;;; minimize vertical wirelength
 (minimize   (bvadd  (ite ( = E_r1c1_r2c1 true) COST_v1 (_ bv0 4))
                     (ite ( = E_r1c2_r2c2 true) COST_v1 (_ bv0 4))
                     (ite ( = E_r2c1_r3c1 true) COST_v2 (_ bv0 4))
