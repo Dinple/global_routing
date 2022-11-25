@@ -1,20 +1,31 @@
 ; Begin SMT Formulation
 
+; Define Total Edges Cost
+(declare-const COST_Edge (_ BitVec 8))
+
+; Define Total Vertex Cost
+(declare-const COST_Vertex (_ BitVec 8))
+
+; Define Total Wirelength Cost
+(declare-const COST_WL (_ BitVec 8))
+
 ; Define Horizontal Edge Cost
-(declare-const COST_h1 (_ BitVec 4))
-(declare-const COST_h2 (_ BitVec 4))
-(assert (= COST_h1 (_ bv2 4)))
-(assert (= COST_h2 (_ bv1 4)))
+(declare-const COST_H (_ BitVec 8))
+(declare-const COST_h1 (_ BitVec 8))
+(declare-const COST_h2 (_ BitVec 8))
+(assert (= COST_h1 (_ bv2 8)))
+(assert (= COST_h2 (_ bv1 8)))
 
 ; Define Vertical Edge Cost
-(declare-const COST_v1 (_ BitVec 4))
-(declare-const COST_v2 (_ BitVec 4))
-(assert (= COST_v1 (_ bv6 4)))
-(assert (= COST_v2 (_ bv3 4)))
+(declare-const COST_V (_ BitVec 8))
+(declare-const COST_v1 (_ BitVec 8))
+(declare-const COST_v2 (_ BitVec 8))
+(assert (= COST_v1 (_ bv6 8)))
+(assert (= COST_v2 (_ bv3 8)))
 
 ; Define Steiner Point Cost
-(declare-const COST_sp (_ BitVec 4))
-(assert (= COST_sp (_ bv1 4)))
+(declare-const COST_sp (_ BitVec 8))
+(assert (= COST_sp (_ bv1 8)))
 
 ; Define Edges
 ;; r1
@@ -82,90 +93,103 @@
 ; Max steiner points is n - 1
 (assert ((_ at-most 3) V_r1c1 V_r2c1 V_r2c3 V_r3c2 V_r3c3))
 
-; Minimize steiner points use (also can model over every single points)
-(minimize   (bvadd  (ite ( = V_r1c1 true) COST_sp (_ bv0 4))
-                    (ite ( = V_r2c1 true) COST_sp (_ bv0 4))
-                    (ite ( = V_r2c3 true) COST_sp (_ bv0 4))
-                    (ite ( = V_r3c2 true) COST_sp (_ bv0 4))
-                    (ite ( = V_r3c3 true) COST_sp (_ bv0 4))
-            )
-)
-
-; Minimize steiner points use (also can model over every single points)
-(minimize   (bvadd  (ite ( = V_r1c2 true) COST_sp (_ bv0 4))
-                    (ite ( = V_r2c1 true) COST_sp (_ bv0 4))
-                    (ite ( = V_r2c3 true) COST_sp (_ bv0 4))
-                    (ite ( = V_r3c2 true) COST_sp (_ bv0 4))
-                    (ite ( = V_r3c3 true) COST_sp (_ bv0 4))
-            )
-)
-
-; Minimize total wirelength (this is bad cuz i assume total wl)
 ;; Horizontal wirelength
-(assert (bvsle
-            (bvadd  (ite ( = E_r1c1_r1c2 true) COST_h1 (_ bv0 4))
-                    (ite ( = E_r1c2_r1c3 true) COST_h2 (_ bv0 4))
-                    (ite ( = E_r2c1_r2c2 true) COST_h1 (_ bv0 4))
-                    (ite ( = E_r2c2_r2c3 true) COST_h2 (_ bv0 4))
-                    (ite ( = E_r3c1_r3c2 true) COST_h1 (_ bv0 4))
-                    (ite ( = E_r3c2_r3c3 true) COST_h2 (_ bv0 4))
-            )
-            (bvadd  COST_h1 COST_h2 COST_h1)
+(assert (=      COST_H
+                (bvadd  (ite ( = E_r1c1_r1c2 true) COST_h1 (_ bv0 8))
+                        (ite ( = E_r1c2_r1c3 true) COST_h2 (_ bv0 8))
+                        (ite ( = E_r2c1_r2c2 true) COST_h1 (_ bv0 8))
+                        (ite ( = E_r2c2_r2c3 true) COST_h2 (_ bv0 8))
+                        (ite ( = E_r3c1_r3c2 true) COST_h1 (_ bv0 8))
+                        (ite ( = E_r3c2_r3c3 true) COST_h2 (_ bv0 8))
+                )
         )
+
 )
+;;; not less than equal to some this "heuristic value"
+
 ;;; not equal to 0
 (assert (not(=
-            (bvadd  (ite ( = E_r1c1_r1c2 true) COST_h1 (_ bv0 4))
-                    (ite ( = E_r1c2_r1c3 true) COST_h2 (_ bv0 4))
-                    (ite ( = E_r2c1_r2c2 true) COST_h1 (_ bv0 4))
-                    (ite ( = E_r2c2_r2c3 true) COST_h2 (_ bv0 4))
-                    (ite ( = E_r3c1_r3c2 true) COST_h1 (_ bv0 4))
-                    (ite ( = E_r3c2_r3c3 true) COST_h2 (_ bv0 4))
-            )
-            (_ bv0 4)
+            COST_H
+            (_ bv0 8)
         ))
 )
-(minimize   (bvadd  (ite ( = E_r1c1_r1c2 true) COST_h1 (_ bv0 4))
-                    (ite ( = E_r1c2_r1c3 true) COST_h2 (_ bv0 4))
-                    (ite ( = E_r2c1_r2c2 true) COST_h1 (_ bv0 4))
-                    (ite ( = E_r2c2_r2c3 true) COST_h2 (_ bv0 4))
-                    (ite ( = E_r3c1_r3c2 true) COST_h1 (_ bv0 4))
-                    (ite ( = E_r3c2_r3c3 true) COST_h2 (_ bv0 4))
-            )
-)
+
+;;(minimize   COST_H)
 
 ;; Vertical wirelength
-(assert (bvsle
-            (bvadd  (ite ( = E_r1c1_r2c1 true) COST_v1 (_ bv0 4))
-                    (ite ( = E_r1c2_r2c2 true) COST_v1 (_ bv0 4))
-                    (ite ( = E_r1c3_r2c3 true) COST_v1 (_ bv0 4))
-                    (ite ( = E_r2c1_r3c1 true) COST_v2 (_ bv0 4))
-                    (ite ( = E_r2c2_r3c2 true) COST_v2 (_ bv0 4))
-                    (ite ( = E_r2c3_r3c3 true) COST_v2 (_ bv0 4))
-            )
-            (bvadd  COST_v1 COST_v2)
+(assert (=      COST_V
+                (bvadd  (ite ( = E_r1c1_r2c1 true) COST_v1 (_ bv0 8))
+                        (ite ( = E_r1c2_r2c2 true) COST_v1 (_ bv0 8))
+                        (ite ( = E_r1c3_r2c3 true) COST_v1 (_ bv0 8))
+                        (ite ( = E_r2c1_r3c1 true) COST_v2 (_ bv0 8))
+                        (ite ( = E_r2c2_r3c2 true) COST_v2 (_ bv0 8))
+                        (ite ( = E_r2c3_r3c3 true) COST_v2 (_ bv0 8))
+                )
         )
 )
+;;; not less than equal to some this "heuristic value"
+
 ;;; not equal to 0
 (assert (not(=
-            (bvadd  (ite ( = E_r1c1_r2c1 true) COST_v1 (_ bv0 4))
-                    (ite ( = E_r1c2_r2c2 true) COST_v1 (_ bv0 4))
-                    (ite ( = E_r1c3_r2c3 true) COST_v1 (_ bv0 4))
-                    (ite ( = E_r2c1_r3c1 true) COST_v2 (_ bv0 4))
-                    (ite ( = E_r2c2_r3c2 true) COST_v2 (_ bv0 4))
-                    (ite ( = E_r2c3_r3c3 true) COST_v2 (_ bv0 4))
-            )
-            (_ bv0 4)
+            COST_V
+            (_ bv0 8)
         ))
 )
-(minimize   (bvadd  (ite ( = E_r1c1_r2c1 true) COST_v1 (_ bv0 4))
-                    (ite ( = E_r1c2_r2c2 true) COST_v1 (_ bv0 4))
-                    (ite ( = E_r1c3_r2c3 true) COST_v1 (_ bv0 4))
-                    (ite ( = E_r2c1_r3c1 true) COST_v2 (_ bv0 4))
-                    (ite ( = E_r2c2_r3c2 true) COST_v2 (_ bv0 4))
-                    (ite ( = E_r2c3_r3c3 true) COST_v2 (_ bv0 4))
-            )
+
+;;(minimize   COST_V)
+
+; Minimize total wirelength (shouldnt consider V/H separately)
+(assert (=      COST_WL
+                (bvadd  COST_H
+                        COST_V
+                )
+        )
 )
+
+(minimize   COST_WL)
+
+; Minimize total edges used (no length considered, unit cost 1 per edge)
+(assert (=      COST_Edge
+                (bvadd  (ite ( = E_r1c1_r1c2 true) (_ bv1 8) (_ bv0 8))
+                        (ite ( = E_r1c2_r1c3 true) (_ bv1 8) (_ bv0 8))
+                        (ite ( = E_r2c1_r2c2 true) (_ bv1 8) (_ bv0 8))
+                        (ite ( = E_r2c2_r2c3 true) (_ bv1 8) (_ bv0 8))
+                        (ite ( = E_r3c1_r3c2 true) (_ bv1 8) (_ bv0 8))
+                        (ite ( = E_r3c2_r3c3 true) (_ bv1 8) (_ bv0 8))
+                        (ite ( = E_r1c1_r2c1 true) (_ bv1 8) (_ bv0 8))
+                        (ite ( = E_r1c2_r2c2 true) (_ bv1 8) (_ bv0 8))
+                        (ite ( = E_r1c3_r2c3 true) (_ bv1 8) (_ bv0 8))
+                        (ite ( = E_r2c1_r3c1 true) (_ bv1 8) (_ bv0 8))
+                        (ite ( = E_r2c2_r3c2 true) (_ bv1 8) (_ bv0 8))
+                        (ite ( = E_r2c3_r3c3 true) (_ bv1 8) (_ bv0 8))
+                )
+        )
+)
+
+; Minimize total vertices used 
+(assert (=      COST_Vertex
+                (bvadd  (ite ( = V_r1c1 true) (_ bv1 8) (_ bv0 8))
+                        (ite ( = V_r1c2 true) (_ bv1 8) (_ bv0 8))
+                        (ite ( = V_r1c3 true) (_ bv1 8) (_ bv0 8))
+                        (ite ( = V_r2c1 true) (_ bv1 8) (_ bv0 8))
+                        (ite ( = V_r2c2 true) (_ bv1 8) (_ bv0 8))
+                        (ite ( = V_r2c3 true) (_ bv1 8) (_ bv0 8))
+                        (ite ( = V_r3c1 true) (_ bv1 8) (_ bv0 8))
+                        (ite ( = V_r3c2 true) (_ bv1 8) (_ bv0 8))
+                        (ite ( = V_r3c3 true) (_ bv1 8) (_ bv0 8))
+                )
+        )
+
+)
+(minimize   COST_Vertex)
+(minimize   COST_Edge)
+
+; Connectivity Property |E| = |V| - 1
+(assert (=      COST_Edge
+                (bvsub  COST_Vertex (_ bv1 8))
+        )
+)
+
 (check-sat)
 (get-model)
 (get-objectives)
